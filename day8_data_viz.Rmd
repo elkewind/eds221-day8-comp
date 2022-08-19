@@ -98,8 +98,7 @@ lizard_counts2 <- lizards |>
   count(common_name)
 ```
 
-Make a column graph (bar plot)
-ggplot default is to plot in alphabetic order - must convert to factor using `fct_reorder()`
+Make a column graph (bar plot) ggplot default is to plot in alphabetic order - must convert to factor using `fct_reorder()`
 
 ```{r}
 ggplot(data = lizard_counts, 
@@ -200,8 +199,7 @@ ggplot(data = lizards_median, aes(x = total_length,
   scale_fill_paletteer_d(palette = "ggsci::default_gsea")
 ```
 
-Use `show.legend = FALSE` to remove legend
-Use `view(palettes_d_names)` to see palettes
+Use `show.legend = FALSE` to remove legend Use `view(palettes_d_names)` to see palettes
 
 ```{r}
 ggplot(data = lizards, aes(x = total_length, 
@@ -287,3 +285,53 @@ ggplot()+
   scale_fill_paletteer_d(palette = "ggthemes::manyeys")
 ```
 
+### Make a heat map
+
+```{r}
+lizard_counts <- lizards |> 
+  mutate(date = lubridate::mdy(date)) |> 
+  count(year = lubridate::year(date),
+        common_name) |> 
+  drop_na()
+
+ggplot(data = lizard_counts, aes(x = year, 
+                                 y = common_name)) +
+  geom_tile(aes(fill = n), show.legend = FALSE) +
+  geom_text(aes(label = n), 
+            color = "white", 
+            size = 3) +
+  scale_fill_gradientn(colors = c("navy", "red", "orange")) +
+  theme_minimal()
+```
+
+### Beeswarm plot
+
+```{r}
+whiptails <- lizards |> 
+  filter(common_name == "western whiptail") |> 
+  drop_na(total_length, weight)
+
+
+whiptail_bee <- ggplot(data = whiptails, aes(x = sex, y = weight)) +
+  geom_beeswarm() +
+  geom_boxplot(fill = NA)
+```
+
+### Marginal plot
+
+```{r}
+whiptail_plot <- whiptails |> 
+  ggplot(aes(x = total_length, 
+             y = weight,
+             color = sex)) +
+  geom_point()+
+  theme(legend.position = "bottom")
+
+ggMarginal(whiptail_plot, type = "boxplot", groupColour = TRUE)
+```
+
+### Patchwork
+
+```{r}
+(whiptail_bee + whiptail_plot)
+```
